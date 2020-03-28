@@ -3,6 +3,49 @@ import time
 import random
 import math
 
+pygame.display.set_caption("Avoid Ball!")
+
+class Character(pygame.sprite.Sprite): #캐릭터 class
+    def __init__(self, start_pos, up_key, down_key, left_key, right_key, speed):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.transform.scale(pygame.image.load("character.png").convert_alpha(),(50,50))
+        self.rect = self.image.get_rect(center=start_pos)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.up_key, self.down_key, self.left_key, self.right_key = up_key, down_key, left_key, right_key
+        self.speed=speed
+    def update(self, pressed):
+        if pressed[self.up_key]:   self.rect.move_ip(0, -self.speed)
+        if pressed[self.down_key]: self.rect.move_ip(0,  self.speed)
+        if pressed[self.left_key]: self.rect.move_ip(-self.speed, 0)
+        if pressed[self.right_key]: self.rect.move_ip(self.speed, 0)
+        # keep the paddle inside the screen
+        self.rect.clamp_ip(pygame.display.get_surface().get_rect())
+
+    def draw(self, surface):
+        screen.blit(self.image,self.rect.center)
+
+class Ball(pygame.sprite.Sprite): #Ball 클래스
+    def __init__(self, start_pos, dx, dy):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("Ball.png").convert_alpha()
+        self.rect = self.image.get_rect(topleft=start_pos)
+        pygame.draw.circle(self.image, pygame.color.Color('White'), self.image.get_rect().center, 10)
+        self.mask = pygame.mask.from_surface(self.image)
+        # the vector we use to move the ball
+        self.move_v = (dx,dy)
+        # store the absolute position in self.pos
+        # because a rect can only use integers
+        self.pos = self.rect.center
+    def update(self, dx, dy):
+        # check if the ball collides with any other sprite
+        collide = [s for s in pygame.sprite.spritecollide(self, self.groups()[0], False, pygame.sprite.collide_mask) if s != self]
+        if collide:
+            # warning: this does not handle the case of the ball hits
+            # the top or bottom of the paddle, only the sides.
+            self.move_v = [-self.move_v[0], self.move_v[1]]
+
+        self.rect.move_ip(self.move_v)
+
 def first_screen(): #첫번쨰화면
     global difficulty
     screen.fill(WHITE)  # 단색으로 채워 화면 지우기
@@ -15,7 +58,7 @@ def first_screen(): #첫번쨰화면
     pygame.draw.rect(screen, BLUE, normal_button)
     pygame.draw.rect(screen, BLUE, hard_button)
 
-    game_name_image = large_font.render('똥피하기', True, RED)
+    game_name_image = large_font.render('Avoid Ball!', True, RED)
     screen.blit(game_name_image, game_name_image.get_rect(centerx=SCREEN_WIDTH // 2, centery=SCREEN_HEIGHT * (1 / 6)))
     easy_image = small_font.render('EASY', True, RED)
     screen.blit(easy_image, easy_image.get_rect(centerx=SCREEN_WIDTH // 2, centery=SCREEN_HEIGHT * (3 / 6)))
@@ -50,20 +93,6 @@ def print_score(score):#스코어변수는 인티져타입,오른쪽위점수띄
     score_image = large_font.render('{}점'.format(score), True, BLACK)
     screen.blit(score_image, score_image.get_rect(right=SCREEN_WIDTH - 10, top=10))
 
-def character_move(event):
-    global character_x,character_y
-    speed=5#캐릭터 속도
-    if event.type == pygame.KEYDOWN :
-        if event.key == pygame.K_w:#위로
-             character_y -= speed
-        if event.key == pygame.K_a:#왼쪾
-             character_x -= speed
-        if event.key == pygame.K_s:#아래쪾
-             character_y += speed
-        if event.key == pygame.K_d:#오른쪽
-             character_x += speed
-    pygame.draw.circle(screen,BLUE,(character_x,character_y),12)
-
 def makeAB():
     AB=[]
     a = random.randint(-7, 7)  # 위
@@ -87,44 +116,14 @@ def make_dxdy(a,b,v):
     elif a<0: a=-1
     if b>0: b=1
     elif b<0: b=-1
-    print(dx*a, dy*b)
     return dx*a,dy*b
 
 def make_ball(v):
-    size=2
-    dxdy=[]
-    global up,down,left,right,ball
+    global rand_pos,ball
     ab=makeAB()
     for i in range(0,len(ab)):
         dx,dy=make_dxdy(ab[i][0],ab[i][1],v)
-        dxdy.append([dx,dy])
-
-    ball.append([pygame.Rect(up[0]-size/2,up[1]+10,size*2,size*2),dxdy[0][0],dxdy[0][1]])
-    ball.append([pygame.Rect(down[0]-size/2,down[1]-size*2-10,size*2,size*2),dxdy[1][0],dxdy[1][0]])
-    ball.append([pygame.Rect(left[0]+10,left[1]-size/2,size*2,size*2),dxdy[2][0],dxdy[2][1]])
-    ball.append([pygame.Rect(right[0]-size*2-10,right[1]-size/2,size*2,size*2),dxdy[3][0],dxdy[3][1]])
-
-def draw_ball():
-    global ball, character
-    for i in ball:
-        pygame.draw.circle(screen,RED,(i[0].centerx,i[0].centery),i[0].width*3)
-        if character.collidepoint(i[0].centerx, i[0].centery):
-            return True
-    return False
-
-def move_ball():
-    global ball#ball의정보
-    for i in range(0,len(ball)):
-        ball[i][0].centerx+=ball[i][1]
-        ball[i][0].centery+=ball[i][2]
-        if ball[i][0].top < 0:
-            ball[i][2]=abs(ball[i][2])
-        if ball[i][0].bottom > SCREEN_HEIGHT:
-            ball[i][2]=-abs(ball[i][2])
-        if ball[i][0].right > SCREEN_WIDTH:
-            ball[i][1]=-abs(ball[i][1])
-        if ball[i][0].left < 0:
-            ball[i][1]*=abs(ball[i][1])
+        ball.append(Ball(random.choice(rand_pos),dx,dy))
 
 pygame.init() #파이 게임 초기화
 SCREEN_WIDTH = 600
@@ -149,12 +148,8 @@ normal_button=pygame.Rect(SCREEN_WIDTH //2-75, SCREEN_HEIGHT*(4/6)-25 ,150,50)
 hard_button=pygame.Rect(SCREEN_WIDTH //2-75, SCREEN_HEIGHT*(5/6)-25 ,150,50)
 
 
-up=(SCREEN_WIDTH//2,0)
-right=(SCREEN_WIDTH,SCREEN_HEIGHT//2)
-down=(SCREEN_WIDTH//2,SCREEN_HEIGHT)
-left=(0,SCREEN_HEIGHT//2)
+rand_pos=[[SCREEN_WIDTH//2,0],[SCREEN_WIDTH,SCREEN_HEIGHT//2],[SCREEN_WIDTH//2,SCREEN_HEIGHT],[0,SCREEN_HEIGHT//2]]
 
-ball=[]
 cnt=0
 score=0
 difficulty=0
@@ -166,40 +161,33 @@ while not first_screen():
 
 screen_num=difficulty
 
-character_x=SCREEN_WIDTH//2-5
-character_y=SCREEN_HEIGHT//2-5
-character=pygame.Rect(character_x,character_y,20,20)
+character = Character((SCREEN_WIDTH//2, SCREEN_HEIGHT//2), pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d,5)
+ball=[]
+make_ball(difficulty*3)
+sprites=pygame.sprite.Group(character,ball)
 
 while screen_num>0 and screen_num<4:
     screen.fill(WHITE)
     event = pygame.event.poll()
     if event.type == pygame.QUIT:
         pygame.quit()
-    character_move(event)
-
+    event=pygame.key.get_pressed()
+    character.update(event)
+    character.draw(screen)
     if cnt%50==0:
         score+=1
     print_score(score)
     if cnt%200==0:
-        make_ball(difficulty*5)
+        make_ball(difficulty*3)
 
-    move_ball()
-
-    event = pygame.event.poll()
-    if event.type == pygame.QUIT:
-        pygame.quit()
-    character_move(event)
-
-    if draw_ball():
-        screen_num=4
-        time.sleep(3)
-        break
-
+    event = pygame.key.get_pressed()
+    character.update(event)
+    character.draw(screen)
     pygame.display.update()
     clock.tick(60)
     cnt += 1
 
-for i in range(0,1200):#맞고나서 빠바밤 해주는곳
+for i in range(0,1200):
     draw_ball()
     pygame.draw.circle(screen, BLACK, (character_x, character_y), i//2)
     pygame.display.update()
