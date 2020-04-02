@@ -9,10 +9,13 @@ class Button():
         self.button=pygame.Rect(0,0,self.width,self.height)
         self.button.center=(self.pos_x,self.pos_y)
         self.font=False
+        self.image=False
     def draw(self, s):
         pygame.draw.rect(s,GREY, self.button)
         if self.font:
             s.blit(self.font,self.font.get_rect(centerx=self.pos_x, centery=self.pos_y))
+        if self.image:
+            s.blit(self.image, self.rect.center)
     def check_click(self,mouse_pos, event,screen):
         if self.button.collidepoint(mouse_pos):
             if self.font:
@@ -31,3 +34,7 @@ class Button():
         self.txt = txt
         self.font_size = font_size
         self.font = pygame.font.SysFont('georgia', self.font_size).render(txt, True, RED)
+
+    def add_image(self, image):
+        self.image = pygame.transform.scale(pygame.image.load(image).convert_alpha(), (50,50))
+        self.rect = self.image.get_rect(center=(self.pos_x, self.pos_y))
