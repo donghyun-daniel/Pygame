@@ -124,8 +124,19 @@ while True: #Game Screen of TD
             Button.add_image(tower[3], "images/tower3_1.png")
 
     if build_state:
-        if show_towers(tower, mouse, event, game_screen.screen) == tower[0]: #if click cancel button
+        which=show_towers(tower, mouse, event, game_screen.screen)
+        if which == tower[0]: #if click cancel button
             build_state = False
+        elif which == tower[1]:
+            pass
+            #build tower1
+        elif which == tower[2]:
+            pass
+            # build tower2
+        elif which == tower[3]:
+            pass
+            # build tower3
+
 
     if isPause:
         cnt-=1 #Stop time
