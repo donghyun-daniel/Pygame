@@ -5,6 +5,7 @@ from Button import *
 from Screen import *
 from Definition import *
 from Tower import *
+from Enemy import *
 
 def check_area(mouse_pos, m, m_p, screen, event): #draw on the selected area, if user click on avilable area
     i = mouse_pos[1] // 50 - 2
@@ -27,6 +28,17 @@ def print_map(m,m_p,screen): #draw available area
 def show_towers(l, mouse, event, screen): #pos is the value in the map_pos
     for i in l:
         Button.draw(i,game_screen.screen)
+
+    txt_font=pygame.font.SysFont('georgia', 20)
+    c = txt_font.render('CANCEL', False, RED)
+    t1 = txt_font.render('$20', True, YELLOW)
+    t2 = txt_font.render('$50', True, YELLOW)
+    t3 = txt_font.render('$80', True, YELLOW)
+    screen.blit(c, c.get_rect(centerx=l[0].button.centerx, centery=l[0].button.centery+40))
+    screen.blit(t1, t1.get_rect(centerx=l[1].button.centerx, centery=l[1].button.centery+40))
+    screen.blit(t2, t2.get_rect(centerx=l[2].button.centerx, centery=l[2].button.centery+40))
+    screen.blit(t3, t3.get_rect(centerx=l[3].button.centerx, centery=l[3].button.centery+40))
+
     for i in l:
         b = Button.check_click(i,mouse,event,screen)
         if b!=None:
@@ -128,12 +140,15 @@ while True: #Game Screen of TD
         if which == tower[0]: #if click cancel button
             build_state = False
         elif which == tower[1]:
+            build_state = False
             pass
             #build tower1
         elif which == tower[2]:
+            build_state = False
             pass
             # build tower2
         elif which == tower[3]:
+            build_state = False
             pass
             # build tower3
 
