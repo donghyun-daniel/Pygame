@@ -24,21 +24,17 @@ def print_map(m,m_p,screen): #draw available area
             if m[i][j]==0: #if build available area
                 pygame.draw.rect(screen, (100, 50, 255, 50), [m_p[i][j][0]-25, m_p[i][j][1]-25, 50, 50], 1)
 
-def build_tower(pos,m,e,scr): #pos is the value in the map_pos
-    global build_state,tower
-    tower.append(Button(pos[0],pos[1],50,50))
-    tower.append(Button(pos[0], pos[1], 50, 50))
-    tower.append(Button(pos[0], pos[1], 50, 50))
-    tower.append(Button(pos[0], pos[1], 50, 50))
-    Button.add_image(tower[0], "images/cancel.png")
-    Button.add_image(tower[1], "images/tower1_1.png")
-    Button.add_image(tower[2], "images/tower2_1.png")
-    Button.add_image(tower[3], "images/tower3_1.png")
-    for t in tower:
-        Button.draw(t,game_screen.screen)
-    for t in range(len(tower)):
-        if (tower[0] == Button.check_click(tower[t], m, e, scr)): #if that button was cancel
-            build_state=False
+def show_towers(l, mouse, event, screen): #pos is the value in the map_pos
+    for i in l:
+        Button.draw(i,game_screen.screen)
+    for i in l:
+        b = Button.check_click(i,mouse,event,screen)
+        if b!=None:
+            return b
+    return False
+
+
+
 
 
 #map, map_pos init
@@ -92,8 +88,12 @@ buttons.append(pause)
 isPause=False
 money, score, life = 100, 0, 100
 build_state, where_click= False, False # "where" is the pos where the mouse click on avail place
-tower=[]
 cnt=0
+
+tower=[]
+for i in range(4):
+    tower.append(Button(0,0, 50, 50))
+
 while True: #Game Screen of TD
     Screen.draw_values(first_screen, money, score, life, 40)
     event = pygame.event.get() #get event
@@ -110,15 +110,22 @@ while True: #Game Screen of TD
         if a==pause: #if user click pause
             isPause = not(isPause)
 
-    if (100<=mouse[0] and mouse[0]<1100) and (100<=mouse[1] and mouse[1] < 700):  #if mouse is on the map
+    if (100<=mouse[0] and mouse[0]<1100) and (100<=mouse[1] and mouse[1] < 700) and not build_state:  #if mouse is on the map
         where = check_area(mouse, map, map_pos, game_screen.screen, event)
         if where and not build_state: #user click on build available area, do build
-            where_click=where
             build_state=True
-    if build_state and where_click:
-        build(where_click, mouse, event, game_screen.screen)
+            tower[0].button.center=(where[0]+50, where[1]+50)
+            tower[1].button.center=(where[0]-50, where[1]-50)
+            tower[2].button.center = (where[0]+50, where[1]-50)
+            tower[3].button.center = (where[0]-50, where[1]+50)
+            Button.add_image(tower[0], "images/cancel.png")
+            Button.add_image(tower[1], "images/tower1_1.png")
+            Button.add_image(tower[2], "images/tower2_1.png")
+            Button.add_image(tower[3], "images/tower3_1.png")
 
-
+    if build_state:
+        if show_towers(tower, mouse, event, game_screen.screen) == tower[0]: #if click cancel button
+            build_state = False
 
     if isPause:
         cnt-=1 #Stop time
