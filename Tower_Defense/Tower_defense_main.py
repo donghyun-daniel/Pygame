@@ -46,29 +46,6 @@ def show_towers(l, mouse, event, screen): #pos is the value in the map_pos
     return False
 
 
-
-
-
-#map, map_pos init
-map=[[1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],#1이길 0은 설치되는곳
-      [0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0],
-      [0,0,1,0,0,0,1,0,0,0,0,1,0,0,1,1,1,0,0,0],
-      [0,0,1,0,0,0,1,0,0,0,0,1,0,0,1,0,1,0,0,0],
-      [0,0,1,0,0,0,1,0,1,1,1,1,0,0,1,0,1,0,0,0],
-      [0,0,1,0,0,0,1,0,1,0,0,0,0,0,1,0,1,0,0,0],
-      [0,0,1,0,0,0,1,0,1,0,0,0,1,1,1,0,1,0,0,0],
-      [0,0,1,1,1,1,1,0,1,0,0,0,1,0,0,0,1,0,0,0],
-      [0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,1,1,0],
-      [0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0],
-      [0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1]]
-map_pos=[]
-
-for i in range(len(map)):
-    map_pos.append([])
-    for j in range(len(map[0])):
-        map_pos[i].append((125 + (j * 50), 125 + (i * 50)))
-
 #First Screen
 buttons=[]
 start=Button(S_WIDTH//2, S_HEIGHT//3*2, 300, 100)
@@ -101,6 +78,11 @@ isPause=False
 money, score, life = 100, 0, 100
 build_state, where_click= False, False # "where" is the pos where the mouse click on avail place
 cnt=0
+
+route=[]
+ans = [0, 0, 0, 2]
+while ans:
+    ans = dest(ans[1], ans[2], ans[3], map, route)
 
 tower=[]
 for i in range(4):
@@ -151,7 +133,6 @@ while True: #Game Screen of TD
             build_state = False
             pass
             # build tower3
-
 
     if isPause:
         cnt-=1 #Stop time
