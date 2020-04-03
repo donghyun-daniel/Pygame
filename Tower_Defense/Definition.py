@@ -66,6 +66,7 @@ for i in range(len(map)):
     for j in range(len(map[0])):
         map_pos[i].append((125 + (j * 50), 125 + (i * 50)))
 
+#make route
 route=[(125,125)]
 ans = [0, 0, 0, 2]
 while ans:

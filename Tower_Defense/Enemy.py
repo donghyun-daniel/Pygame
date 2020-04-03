@@ -2,12 +2,13 @@ import pygame
 from Definition import *
 
 class Enemy():
-    def __init__(self, speed, hp, gold, kind):
+    def __init__(self, hp, gold, kind):
         if kind=="small":
             self.image = pygame.transform.scale(pygame.image.load("images/enemy_small.png").convert_alpha(), (50, 50))
+            self.speed=5
         elif kind=="big":
             self.image = pygame.transform.scale(pygame.image.load("images/enemy_big.png").convert_alpha(), (50, 50))
-        self.speed=speed
+            self.speed=2
         self.hp=hp
         self.gold=gold
         self.button = pygame.Rect(100, 100, 50, 50)
@@ -19,8 +20,8 @@ class Enemy():
         s.blit(self.image, self.button.topleft)
 
     def move_Enemy(self, r):
-        if self.button.centerx == r[-1][0] and self.button.centery == r[-1][1]: #if enemy arrived at end point
-            return True
+        if self.index==len(r):
+            return self
         elif self.button.centerx!=r[self.index][0] or self.button.centery!=r[self.index][1]:
             if self.button.centerx<r[self.index][0]:
                 self.button.centerx+=self.speed

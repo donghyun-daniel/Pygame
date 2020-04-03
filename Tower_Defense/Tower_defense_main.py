@@ -45,6 +45,19 @@ def show_towers(l, mouse, event, screen): #pos is the value in the map_pos
             return b
     return False
 
+def stage_enemy_small(cnt, small_interval, E, s):
+    if cnt%small_interval==0:
+        E.append(Enemy(100, 10, "small"))  # hp, gold, kind
+        s[stage_index][0]-=1
+
+
+def stage_enemy_big(cnt, big_interval, E, s):
+    if cnt%big_interval==0:
+        E.append(Enemy(100, 10, "big"))  # hp, gold, kind
+        s[stage_index][1]-=1
+
+
+
 
 #First Screen
 buttons=[]
@@ -54,7 +67,6 @@ buttons.append(start)
 first_screen = Screen("images/background.png", 1200, 800)
 game_name_txt = pygame.font.SysFont('georgia', 100).render('Tower Defense', True, WHITE)
 first_screen.screen.blit(game_name_txt, game_name_txt.get_rect(centerx=S_WIDTH//2, centery=S_HEIGHT//3))
-
 
 while True: #First Screen of TD
     event=pygame.event.get()
@@ -77,77 +89,99 @@ buttons.append(pause)
 isPause=False
 money, score, life = 100, 0, 100
 build_state, where_click= False, False # "where" is the pos where the mouse click on avail place
-cnt=0
-
-#make route
-
+cnt=-400
+stage_interval=10000
 
 #make Enemy's list
 E=[]
+stage_enemy=[[30, 2],[3,5]]#small_num, big_num
+stage_index=0
 
 tower=[]
 for i in range(4):
     tower.append(Button(0,0, 50, 50))
 
 while True: #Game Screen of TD
-    Screen.draw_values(first_screen, money, score, life, 40)
-    event = pygame.event.get() #get event
-    mouse = pygame.mouse.get_pos() #get mouse position
-    print_map(map, map_pos, game_screen.screen)
-
+    event = pygame.event.get()  # get event
     for e in event:
         if e.type == pygame.QUIT:
             pygame.quit()
 
-    for b in buttons: #check which button is clicked
-        Button.draw(b,game_screen.screen)
-        a = Button.check_click(b, pygame.mouse.get_pos(), event, game_screen.screen)
-        if a==pause: #if user click pause
-            isPause = not(isPause)
+    if isPause: #if Pause, just only do this
+        pygame.display.flip()
+        for b in buttons:  # check which button is clicked
+            Button.draw(b, game_screen.screen)
+            a = Button.check_click(b, pygame.mouse.get_pos(), event, game_screen.screen)
+            if a == pause:  # if user click pause
+                isPause = not (isPause)
+    else:
+        Screen.draw_values(first_screen, money, score, life, 40)
 
-    if (100<=mouse[0] and mouse[0]<1100) and (100<=mouse[1] and mouse[1] < 700) and not build_state:  #if mouse is on the map
-        where = check_area(mouse, map, map_pos, game_screen.screen, event)
-        if where and not build_state: #user click on build available area, do build
-            build_state=True
-            tower[0].button.center=(where[0]+50, where[1]+50)
-            tower[1].button.center=(where[0]-50, where[1]-50)
-            tower[2].button.center = (where[0]+50, where[1]-50)
-            tower[3].button.center = (where[0]-50, where[1]+50)
-            Button.add_image(tower[0], "images/cancel.png")
-            Button.add_image(tower[1], "images/tower1_1.png")
-            Button.add_image(tower[2], "images/tower2_1.png")
-            Button.add_image(tower[3], "images/tower3_1.png")
+        mouse = pygame.mouse.get_pos() #get mouse position
+        print_map(map, map_pos, game_screen.screen)
 
-    if build_state:
-        which=show_towers(tower, mouse, event, game_screen.screen)
-        if which == tower[0]: #if click cancel button
-            build_state = False
-        elif which == tower[1]:
-            build_state = False
-            pass
-            #build tower1
-        elif which == tower[2]:
-            build_state = False
-            pass
-            # build tower2
-        elif which == tower[3]:
-            build_state = False
-            pass
-            # build tower3
+        event = pygame.event.get()  # get event
+        for e in event:
+            if e.type == pygame.QUIT:
+                pygame.quit()
 
-    #make enemy
-    if cnt<100:
-        E.append(Enemy(10, 100, 10, "small")) #speed, hp, gold, kind
-    #move enemy
-    for i in range(len(E)):
-        Enemy.move_Enemy(E[i], route)
-        if Enemy.draw_Enemy(E[i],game_screen.screen):
-            print("!")
+        for b in buttons: #check which button is clicked
+            Button.draw(b,game_screen.screen)
+            a = Button.check_click(b, pygame.mouse.get_pos(), event, game_screen.screen)
+            if a==pause: #if user click pause
+                isPause = not(isPause)
 
-    if isPause:
-        cnt-=1 #Stop time
-    clock.tick(80)
-    pygame.display.flip()
-    cnt+=1 #Time flows....
+        if (100<=mouse[0] and mouse[0]<1100) and (100<=mouse[1] and mouse[1] < 700) and not build_state:  #if mouse is on the map
+            where = check_area(mouse, map, map_pos, game_screen.screen, event)
+            if where and not build_state: #user click on build available area, do build
+                build_state=True
+                tower[0].button.center=(where[0]+50, where[1]+50)
+                tower[1].button.center=(where[0]-50, where[1]-50)
+                tower[2].button.center = (where[0]+50, where[1]-50)
+                tower[3].button.center = (where[0]-50, where[1]+50)
+                Button.add_image(tower[0], "images/cancel.png")
+                Button.add_image(tower[1], "images/tower1_1.png")
+                Button.add_image(tower[2], "images/tower2_1.png")
+                Button.add_image(tower[3], "images/tower3_1.png")
+
+        if build_state:
+            which=show_towers(tower, mouse, event, game_screen.screen)
+            if which == tower[0]: #if click cancel button
+                build_state = False
+            elif which == tower[1]:
+                build_state = False
+                pass
+                #build tower1
+            elif which == tower[2]:
+                build_state = False
+                pass
+                # build tower2
+            elif which == tower[3]:
+                build_state = False
+                pass
+                # build tower3
+        #make enemy
+        if cnt>=300: #stage start interval
+            if stage_enemy[stage_index][0] > 0:
+                stage_enemy_small(cnt,10,E,stage_enemy) # cnt, small_interval, big_interval, E, s
+            if stage_enemy[stage_index][1] > 0:
+                stage_enemy_big(cnt, 35, E, stage_enemy)
+            if len(E)==0: #Everthing made or All enemy is dead
+                cnt=0
+                stage_index+=1
+
+        #move enemy
+        i=0
+        while i<len(E):
+            if Enemy.move_Enemy(E[i], route):
+                del E[i]
+                i -= 1
+            else:
+                Enemy.draw_Enemy(E[i],game_screen.screen)
+            i+=1
+
+        clock.tick(80)
+        pygame.display.flip()
+        cnt+=1 #Time flows....
 
 pygame.quit()
