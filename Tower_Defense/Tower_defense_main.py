@@ -79,10 +79,11 @@ money, score, life = 100, 0, 100
 build_state, where_click= False, False # "where" is the pos where the mouse click on avail place
 cnt=0
 
-route=[]
-ans = [0, 0, 0, 2]
-while ans:
-    ans = dest(ans[1], ans[2], ans[3], map, route)
+#make route
+
+
+#make Enemy's list
+E=[]
 
 tower=[]
 for i in range(4):
@@ -133,6 +134,15 @@ while True: #Game Screen of TD
             build_state = False
             pass
             # build tower3
+
+    #make enemy
+    if cnt<100:
+        E.append(Enemy(10, 100, 10, "small")) #speed, hp, gold, kind
+    #move enemy
+    for i in range(len(E)):
+        Enemy.move_Enemy(E[i], route)
+        if Enemy.draw_Enemy(E[i],game_screen.screen):
+            print("!")
 
     if isPause:
         cnt-=1 #Stop time
