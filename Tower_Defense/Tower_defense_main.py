@@ -45,15 +45,15 @@ def show_towers(l, mouse, event, screen): #pos is the value in the map_pos
             return b
     return False
 
-def stage_enemy_small(cnt, small_interval, E, s):
+def stage_enemy_small(cnt, hp, small_interval, E, s):
     if cnt%small_interval==0:
-        E.append(Enemy(100, 10, "small"))  # hp, gold, kind
+        E.append(Enemy(hp, 10, "small"))  # hp, gold, kind
         s[stage_index][0]-=1
 
 
-def stage_enemy_big(cnt, big_interval, E, s):
+def stage_enemy_big(cnt, hp, big_interval, E, s):
     if cnt%big_interval==0:
-        E.append(Enemy(100, 10, "big"))  # hp, gold, kind
+        E.append(Enemy(hp, 10, "big"))  # hp, gold, kind
         s[stage_index][1]-=1
 
 
@@ -89,12 +89,16 @@ buttons.append(pause)
 isPause=False
 money, score, life = 100, 0, 100
 build_state, where_click= False, False # "where" is the pos where the mouse click on avail place
-cnt=-400
-stage_interval=10000
+cnt=-1
 
 #make Enemy's list
 E=[]
-stage_enemy=[[30, 2],[3,5]]#small_num, big_num
+stage_enemy=[]#small_num, big_num
+for i in range(0, 50):
+    if i%3==2:
+        stage_enemy.append([i * 3, i * 3])
+    else:
+        stage_enemy.append([i * 5 + 5, 0])
 stage_index=0
 
 tower=[]
@@ -115,7 +119,7 @@ while True: #Game Screen of TD
             if a == pause:  # if user click pause
                 isPause = not (isPause)
     else:
-        Screen.draw_values(first_screen, money, score, life, 40)
+        Screen.draw_values(first_screen, money, score, life, stage_index, 40)
 
         mouse = pygame.mouse.get_pos() #get mouse position
         print_map(map, map_pos, game_screen.screen)
@@ -162,11 +166,11 @@ while True: #Game Screen of TD
                 # build tower3
         #make enemy
         if cnt>=300: #stage start interval
-            if stage_enemy[stage_index][0] > 0:
-                stage_enemy_small(cnt,10,E,stage_enemy) # cnt, small_interval, big_interval, E, s
+            if stage_enemy[stage_index][0] > 0 and cnt>=500:
+                stage_enemy_small(cnt, 100+(stage_index//10)*20, 10, E, stage_enemy) # cnt, hp, small_interval, big_interval, E, s
             if stage_enemy[stage_index][1] > 0:
-                stage_enemy_big(cnt, 35, E, stage_enemy)
-            if len(E)==0: #Everthing made or All enemy is dead
+                stage_enemy_big(cnt, 200+(stage_index//10)*50, 40, E, stage_enemy) # cnt, hp, small_interval, big_interval, E, s
+            if stage_enemy[stage_index]==[0,0] and len(E)==0: #Everthing made or All enemy is dead
                 cnt=0
                 stage_index+=1
 
