@@ -184,6 +184,8 @@ while True: #Game Screen of TD
                 Enemy.draw_Enemy(E[i],game_screen.screen)
             i+=1
 
+
+
         clock.tick(80)
         pygame.display.flip()
         cnt+=1 #Time flows....
