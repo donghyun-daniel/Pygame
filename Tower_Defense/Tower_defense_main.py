@@ -101,9 +101,9 @@ for i in range(0, 50):
         stage_enemy.append([i * 5 + 5, 0])
 stage_index=0
 
-tower=[]
+build=[]
 for i in range(4):
-    tower.append(Button(0,0, 50, 50))
+    build.append(Button(0,0, 50, 50))
 
 while True: #Game Screen of TD
     event = pygame.event.get()  # get event
@@ -139,30 +139,35 @@ while True: #Game Screen of TD
             where = check_area(mouse, map, map_pos, game_screen.screen, event)
             if where and not build_state: #user click on build available area, do build
                 build_state=True
-                tower[0].button.center=(where[0]+50, where[1]+50)
-                tower[1].button.center=(where[0]-50, where[1]-50)
-                tower[2].button.center = (where[0]+50, where[1]-50)
-                tower[3].button.center = (where[0]-50, where[1]+50)
-                Button.add_image(tower[0], "images/cancel.png")
-                Button.add_image(tower[1], "images/tower1_1.png")
-                Button.add_image(tower[2], "images/tower2_1.png")
-                Button.add_image(tower[3], "images/tower3_1.png")
+                build[0].button.center=(where[0]+50, where[1]+50)
+                build[1].button.center=(where[0]-50, where[1]-50)
+                build[2].button.center = (where[0]+50, where[1]-50)
+                build[3].button.center = (where[0]-50, where[1]+50)
+                Button.add_image(build[0], "images/cancel.png")
+                Button.add_image(build[1], "images/tower1_1.png")
+                Button.add_image(build[2], "images/tower2_1.png")
+                Button.add_image(build[3], "images/tower3_1.png")
 
         if build_state:
-            which=show_towers(tower, mouse, event, game_screen.screen)
-            if which == tower[0]: #if click cancel button
+            which=show_towers(build, mouse, event, game_screen.screen)
+            if which == build[0]: #if click cancel button
+                print("Cancel")
                 build_state = False
-            elif which == tower[1]:
+                build.clear()
+            elif which == build[1]:
+                print("11")
                 build_state = False
-                pass
+                build.clear()
                 #build tower1
-            elif which == tower[2]:
+            elif which == build[2]:
+                print("22")
                 build_state = False
-                pass
+                build.clear()
                 # build tower2
-            elif which == tower[3]:
+            elif which == build[3]:
+                print("33")
                 build_state = False
-                pass
+                build.clear()
                 # build tower3
         #make enemy
         if cnt>=300: #stage start interval
