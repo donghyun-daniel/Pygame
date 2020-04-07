@@ -25,26 +25,6 @@ def print_map(m,m_p,screen): #draw available area
             if m[i][j]==0: #if build available area
                 pygame.draw.rect(screen, (100, 50, 255, 50), [m_p[i][j][0]-25, m_p[i][j][1]-25, 50, 50], 1)
 
-def show_towers(l, mouse, event, screen): #pos is the value in the map_pos
-    for i in l:
-        Button.draw(i,game_screen.screen)
-
-    txt_font=pygame.font.SysFont('georgia', 20)
-    c = txt_font.render('CANCEL', False, RED)
-    t1 = txt_font.render('$20', True, YELLOW)
-    t2 = txt_font.render('$50', True, YELLOW)
-    t3 = txt_font.render('$80', True, YELLOW)
-    screen.blit(c, c.get_rect(centerx=l[0].button.centerx, centery=l[0].button.centery+40))
-    screen.blit(t1, t1.get_rect(centerx=l[1].button.centerx, centery=l[1].button.centery+40))
-    screen.blit(t2, t2.get_rect(centerx=l[2].button.centerx, centery=l[2].button.centery+40))
-    screen.blit(t3, t3.get_rect(centerx=l[3].button.centerx, centery=l[3].button.centery+40))
-
-    for i in l:
-        b = Button.check_click(i,mouse,event,screen)
-        if b!=None:
-            return b
-    return False
-
 def stage_enemy_small(cnt, hp, small_interval, E, s):
     if cnt%small_interval==0:
         E.append(Enemy(hp, 10, "small"))  # hp, gold, kind
@@ -55,9 +35,6 @@ def stage_enemy_big(cnt, hp, big_interval, E, s):
     if cnt%big_interval==0:
         E.append(Enemy(hp, 10, "big"))  # hp, gold, kind
         s[stage_index][1]-=1
-
-
-
 
 #First Screen
 buttons=[]
@@ -91,6 +68,11 @@ money, score, life = 100, 0, 100
 build_state, where_click= False, False # "where" is the pos where the mouse click on avail place
 cnt=-1
 
+#build button
+build=[]
+for i in range(4):
+    build.append(Button(0,0, 50, 50))
+
 #make Enemy's list
 E=[]
 stage_enemy=[]#small_num, big_num
@@ -100,10 +82,6 @@ for i in range(0, 50):
     else:
         stage_enemy.append([i * 5 + 5, 0])
 stage_index=0
-
-build=[]
-for i in range(4):
-    build.append(Button(0,0, 50, 50))
 
 while True: #Game Screen of TD
     event = pygame.event.get()  # get event
@@ -129,12 +107,12 @@ while True: #Game Screen of TD
             if e.type == pygame.QUIT:
                 pygame.quit()
 
-        for b in buttons: #check which button is clicked
+        for b in buttons: #draw and check which button is clicked
             Button.draw(b,game_screen.screen)
             a = Button.check_click(b, pygame.mouse.get_pos(), event, game_screen.screen)
             if a==pause: #if user click pause
                 isPause = not(isPause)
-
+        """
         if (100<=mouse[0] and mouse[0]<1100) and (100<=mouse[1] and mouse[1] < 700) and not build_state:  #if mouse is on the map
             where = check_area(mouse, map, map_pos, game_screen.screen, event)
             if where and not build_state: #user click on build available area, do build
@@ -149,27 +127,23 @@ while True: #Game Screen of TD
                 Button.add_image(build[3], "images/tower3_1.png")
 
         if build_state:
-            which=show_towers(build, mouse, event, game_screen.screen)
+            which=build_towers(build, mouse, event, game_screen.screen)
             if which == build[0]: #if click cancel button
                 print("Cancel")
                 build_state = False
-                build.clear()
             elif which == build[1]:
                 print("11")
                 build_state = False
-                build.clear()
                 #build tower1
             elif which == build[2]:
                 print("22")
                 build_state = False
-                build.clear()
                 # build tower2
             elif which == build[3]:
                 print("33")
                 build_state = False
-                build.clear()
                 # build tower3
-        #make enemy
+                """
         if cnt>=300: #stage start interval
             if stage_enemy[stage_index][0] > 0 and cnt>=500:
                 stage_enemy_small(cnt, 100+(stage_index//10)*20, 10, E, stage_enemy) # cnt, hp, small_interval, big_interval, E, s

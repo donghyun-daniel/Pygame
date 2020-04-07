@@ -1,4 +1,5 @@
 import pygame
+from Tower import *
 
 #these funcs for make route
 def dest(i,j,dir,l,r):
@@ -65,6 +66,17 @@ for i in range(len(map)):
     map_pos.append([])
     for j in range(len(map[0])):
         map_pos[i].append((125 + (j * 50), 125 + (i * 50)))
+
+tower=[]
+for i in range(0,len(map)):
+    tower.append([])
+    for j in range(len(map[0])):
+        if not map[i][j]:
+            tower.append(Tower(map_pos[i][j][0], map_pos[i][j][1]))
+        else:
+            tower.append(False)
+print(tower)
+
 
 #make route
 route=[(125,125)]
