@@ -39,13 +39,7 @@ BLUE = (50, 50, 255)
 WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
 GREY = (50,50,50)
-
 S_WIDTH, S_HEIGHT = 1200, 800
-
-pygame.init()
-clock = pygame.time.Clock()
-pygame.key.set_repeat(1, 1)
-pygame.display.set_caption("Tower Defense v1")
 
 #map, map_pos init, 0 is build available area, 1 is road
 map=[[1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
@@ -72,11 +66,9 @@ for i in range(0,len(map)):
     tower.append([])
     for j in range(len(map[0])):
         if not map[i][j]:
-            tower.append(Tower(map_pos[i][j][0], map_pos[i][j][1]))
+            tower[i].append(Tower(map_pos[i][j][0], map_pos[i][j][1]))
         else:
-            tower.append(False)
-print(tower)
-
+            tower[i].append(False)
 
 #make route
 route=[(125,125)]

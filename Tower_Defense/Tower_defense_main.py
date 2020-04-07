@@ -1,7 +1,6 @@
 import pygame
 import time
 import random
-from Button import *
 from Screen import *
 from Definition import *
 from Tower import *
@@ -10,14 +9,9 @@ from Enemy import *
 def check_area(mouse_pos, m, m_p, screen, event): #draw on the selected area, if user click on avilable area
     i = mouse_pos[1] // 50 - 2
     j=mouse_pos[0]//50-2
-    if m[i][j]==0:
-        pygame.draw.rect(screen,(255,255,0),[m_p[i][j][0]-25,m_p[i][j][1]-25,50,50])
-        for e in event:
-            if e.type == pygame.MOUSEBUTTONDOWN:
-                return (m_p[i][j][0], m_p[i][j][1])
-            else:
-                return False
-    return False
+    if tower[i][j]:
+        if tower[i][j].type==0:
+            pygame.draw.rect(screen,(180,180,0),[m_p[i][j][0]-25,m_p[i][j][1]-25,50,50],4)
 
 def print_map(m,m_p,screen): #draw available area
     for i in range(len(m)):
@@ -37,7 +31,13 @@ def stage_enemy_big(cnt, hp, big_interval, E, s):
         s[stage_index][1]-=1
 
 #First Screen
+
+pygame.init()
+clock = pygame.time.Clock()
+pygame.key.set_repeat(1, 1)
+pygame.display.set_caption("Tower Defense v1")
 buttons=[]
+
 start=Button(S_WIDTH//2, S_HEIGHT//3*2, 300, 100)
 Button.add_txt(start, 40, "START")
 buttons.append(start)
@@ -62,16 +62,13 @@ buttons.clear() # Remove start button after first screen
 game_screen = Screen("images/background.png", 1200, 800)
 pause=Button(40,S_HEIGHT-50, 40, 40)
 Button.add_txt(pause, 40, "P")
-buttons.append(pause)
+pause_font = pygame.font.SysFont('georgia', 300)
+pause_render = pause_font.render('PAUSE', True, (200, 200, 200))
 isPause=False
-money, score, life = 100, 0, 100
+money, score, life = 1000, 0, 100
 build_state, where_click= False, False # "where" is the pos where the mouse click on avail place
+build_info=0
 cnt=-1
-
-#build button
-build=[]
-for i in range(4):
-    build.append(Button(0,0, 50, 50))
 
 #make Enemy's list
 E=[]
@@ -85,47 +82,55 @@ stage_index=0
 
 while True: #Game Screen of TD
     event = pygame.event.get()  # get event
+    mouse = pygame.mouse.get_pos()  # get mouse position
     for e in event:
         if e.type == pygame.QUIT:
             pygame.quit()
 
+    # check pause button is clicked
+    Button.draw(pause, game_screen.screen)
+    if Button.check_click(pause, pygame.mouse.get_pos(), event, game_screen.screen)==pause:
+        isPause=not(isPause)
+
     if isPause: #if Pause, just only do this
+        game_screen.screen.blit(pause_render, pause_render.get_rect(centerx=(game_screen.width // 2), centery=game_screen.height // 2))
+        Button.draw(pause, game_screen.screen)
         pygame.display.flip()
-        for b in buttons:  # check which button is clicked
-            Button.draw(b, game_screen.screen)
-            a = Button.check_click(b, pygame.mouse.get_pos(), event, game_screen.screen)
-            if a == pause:  # if user click pause
-                isPause = not (isPause)
+
+
     else:
         Screen.draw_values(first_screen, money, score, life, stage_index, 40)
+        Button.draw(pause, game_screen.screen)
 
-        mouse = pygame.mouse.get_pos() #get mouse position
+        for i in range(len(tower)): #Show towers on the map
+            for j in range(len(tower[0])):
+                if tower[i][j]:
+                    if tower[i][j].type>0:
+                        game_screen.screen.blit(tower[i][j].image, tower[i][j].image.get_rect(centerx=tower[i][j].button.centerx, centery=tower[i][j].button.centery))
+
+
         print_map(map, map_pos, game_screen.screen)
 
-        event = pygame.event.get()  # get event
-        for e in event:
-            if e.type == pygame.QUIT:
-                pygame.quit()
+        if (100 <= mouse[0] and mouse[0] < 1100) and (100 <= mouse[1] and mouse[1] < 700) and not build_state:
+            i = mouse[1] // 50 - 2
+            j = mouse[0] // 50 - 2
+            if tower[i][j]:
+                Tower.check_mouse_on(tower[i][j], mouse, game_screen.screen)
+                for e in event:
+                    if e.type == pygame.MOUSEBUTTONDOWN:
+                        build_state = True
+                        build_info=(i,j)
 
-        for b in buttons: #draw and check which button is clicked
-            Button.draw(b,game_screen.screen)
-            a = Button.check_click(b, pygame.mouse.get_pos(), event, game_screen.screen)
-            if a==pause: #if user click pause
-                isPause = not(isPause)
+        if build_state:
+            m = Tower.menu(tower[build_info[0]][build_info[1]], mouse, event, game_screen.screen, money)
+            if m:
+                build_state=False
+                money=m
+
+
+
+
         """
-        if (100<=mouse[0] and mouse[0]<1100) and (100<=mouse[1] and mouse[1] < 700) and not build_state:  #if mouse is on the map
-            where = check_area(mouse, map, map_pos, game_screen.screen, event)
-            if where and not build_state: #user click on build available area, do build
-                build_state=True
-                build[0].button.center=(where[0]+50, where[1]+50)
-                build[1].button.center=(where[0]-50, where[1]-50)
-                build[2].button.center = (where[0]+50, where[1]-50)
-                build[3].button.center = (where[0]-50, where[1]+50)
-                Button.add_image(build[0], "images/cancel.png")
-                Button.add_image(build[1], "images/tower1_1.png")
-                Button.add_image(build[2], "images/tower2_1.png")
-                Button.add_image(build[3], "images/tower3_1.png")
-
         if build_state:
             which=build_towers(build, mouse, event, game_screen.screen)
             if which == build[0]: #if click cancel button
@@ -162,7 +167,6 @@ while True: #Game Screen of TD
             else:
                 Enemy.draw_Enemy(E[i],game_screen.screen)
             i+=1
-
 
 
         clock.tick(80)
