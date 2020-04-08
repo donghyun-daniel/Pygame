@@ -96,7 +96,7 @@ class Tower():  #range, dmg, (atk_speed is lower is better)
                 self.image = pygame.transform.scale(pygame.image.load("images/tower2_1.png").convert_alpha(), (50, 50))
                 self.rect = self.image.get_rect(center=(self.button.centerx, self.button.centery))
                 self.button.center = self.rect.center
-                self.dmg = 80
+                self.dmg = 200
                 self.atk_speed = 150
             if self.level==2:
                 self.image = pygame.transform.scale(pygame.image.load("images/tower2_2.png").convert_alpha(), (50, 50))
@@ -115,8 +115,8 @@ class Tower():  #range, dmg, (atk_speed is lower is better)
                 self.image = pygame.transform.scale(pygame.image.load("images/tower3_1.png").convert_alpha(), (50, 50))
                 self.rect = self.image.get_rect(center=(self.button.centerx, self.button.centery))
                 self.button.center = self.rect.center
-                self.dmg = 70
-                self.atk_speed = 100
+                self.dmg = 10
+                self.atk_speed = 20
             if self.level==2:
                 self.image = pygame.transform.scale(pygame.image.load("images/tower3_2.png").convert_alpha(), (50, 50))
                 self.rect = self.image.get_rect(center=(self.button.centerx, self.button.centery))
@@ -290,7 +290,7 @@ class Tower():  #range, dmg, (atk_speed is lower is better)
             if dist<=self.range: #target is in the range
                 if self.delay%self.atk_speed==0:
                     e.hp-=self.dmg
+                    self.delay = 0
                     if e.hp<=0: # if enemy killed
                         return e.gold
-                    self.delay=0 # When fire, initiate
                     break
