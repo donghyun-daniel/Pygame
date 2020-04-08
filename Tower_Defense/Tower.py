@@ -1,5 +1,6 @@
 import pygame
 import Definition
+import math
 
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -12,6 +13,9 @@ S_WIDTH, S_HEIGHT = 1200, 800
 tower_price=[[30,60,120],
              [50,100,200],
              [100,200,400]]
+tower_range=[[300, 310, 320],
+             [100, 110, 120],
+             [400, 420, 440]]
 
 class Button():
     def __init__(self, pos_x, pos_y, w, h):
@@ -63,6 +67,7 @@ class Tower():  #range, dmg, (atk_speed is lower is better)
         self.pos_y = pos_y
         self.button = pygame.Rect(0, 0, 50, 50)
         self.button.center = (self.pos_x, self.pos_y)
+        self.delay=0
 
     def upgrade(self, money, type, level):
         self.type=type
@@ -72,21 +77,18 @@ class Tower():  #range, dmg, (atk_speed is lower is better)
                 self.image = pygame.transform.scale(pygame.image.load("images/tower1_1.png").convert_alpha(), (50, 50))
                 self.rect = self.image.get_rect(center=(self.button.centerx, self.button.centery))
                 self.button.center = self.rect.center
-                self.range = 300
                 self.dmg = 40
                 self.atk_speed = 50
             elif self.level==2:
                 self.image = pygame.transform.scale(pygame.image.load("images/tower1_2.png").convert_alpha(), (50, 50))
                 self.rect = self.image.get_rect(center=(self.button.centerx, self.button.centery))
                 self.button.center = self.rect.center
-                self.range = int(self.range * 1.1)
                 self.dmg *= 2
                 self.atk_speed -= 3
             elif self.level==3:
                 self.image = pygame.transform.scale(pygame.image.load("images/tower1_3.png").convert_alpha(), (50, 50))
                 self.rect = self.image.get_rect(center=(self.button.centerx, self.button.centery))
                 self.button.center = self.rect.center
-                self.range = int(self.range * 1.1)
                 self.dmg *= 2
                 self.atk_speed -= 3
         elif type==2:
@@ -94,21 +96,18 @@ class Tower():  #range, dmg, (atk_speed is lower is better)
                 self.image = pygame.transform.scale(pygame.image.load("images/tower2_1.png").convert_alpha(), (50, 50))
                 self.rect = self.image.get_rect(center=(self.button.centerx, self.button.centery))
                 self.button.center = self.rect.center
-                self.range = 100
                 self.dmg = 80
-                self.atk_speed = 30
+                self.atk_speed = 150
             if self.level==2:
                 self.image = pygame.transform.scale(pygame.image.load("images/tower2_2.png").convert_alpha(), (50, 50))
                 self.rect = self.image.get_rect(center=(self.button.centerx, self.button.centery))
                 self.button.center = self.rect.center
-                self.range = int(self.range * 1.1)
                 self.dmg *= 2
                 self.atk_speed -= 3
             elif self.level==3:
                 self.image = pygame.transform.scale(pygame.image.load("images/tower2_3.png").convert_alpha(), (50, 50))
                 self.rect = self.image.get_rect(center=(self.button.centerx, self.button.centery))
                 self.button.center = self.rect.center
-                self.range = int(self.range * 1.1)
                 self.dmg *= 2
                 self.atk_speed -= 3
         elif type==3:
@@ -116,23 +115,21 @@ class Tower():  #range, dmg, (atk_speed is lower is better)
                 self.image = pygame.transform.scale(pygame.image.load("images/tower3_1.png").convert_alpha(), (50, 50))
                 self.rect = self.image.get_rect(center=(self.button.centerx, self.button.centery))
                 self.button.center = self.rect.center
-                self.range = 400
                 self.dmg = 70
-                self.atk_speed = 25
+                self.atk_speed = 100
             if self.level==2:
                 self.image = pygame.transform.scale(pygame.image.load("images/tower3_2.png").convert_alpha(), (50, 50))
                 self.rect = self.image.get_rect(center=(self.button.centerx, self.button.centery))
                 self.button.center = self.rect.center
-                self.range = int(self.range*1.1)
                 self.dmg *= 2
                 self.atk_speed -= 3
             elif self.level==3:
                 self.image = pygame.transform.scale(pygame.image.load("images/tower3_3.png").convert_alpha(), (50, 50))
                 self.rect = self.image.get_rect(center=(self.button.centerx, self.button.centery))
                 self.button.center = self.rect.center
-                self.range = int(self.range * 1.1)
                 self.dmg *= 2
                 self.atk_speed -= 3
+        self.range = tower_range[self.type - 1][self.level - 1]
 
 
 
@@ -265,6 +262,9 @@ class Tower():  #range, dmg, (atk_speed is lower is better)
         for b in build:
             Button.draw(b,screen)
             clicked_button = Button.check_click(b,mouse,event,screen)
+            if b.button.collidepoint(mouse):
+                if b.name!="cancel" and b.name!="sell":
+                    pygame.draw.circle(screen, (100,200,100), self.button.center, tower_range[b.name[0]-1][b.name[1]-1], 1)
             Tower.check_mouse_on(b,mouse,screen)
             if clicked_button == b:
                 if clicked_button.name=="sell":
@@ -283,3 +283,14 @@ class Tower():  #range, dmg, (atk_speed is lower is better)
     def check_mouse_on(self, mouse, screen):
         if self.button.collidepoint(mouse):
             pygame.draw.rect(screen, (255, 255, 0), self.button, 4)
+
+    def tower_attack(self, enemy):
+        for e in enemy:
+            dist= int(math.sqrt((self.button.centerx-e.button.centerx)*(self.button.centerx-e.button.centerx) + (self.button.centery-e.button.centery)*(self.button.centery-e.button.centery)))
+            if dist<=self.range: #target is in the range
+                if self.delay%self.atk_speed==0:
+                    e.hp-=self.dmg
+                    if e.hp<=0: # if enemy killed
+                        return e.gold
+                    self.delay=0 # When fire, initiate
+                    break

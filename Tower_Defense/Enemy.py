@@ -10,6 +10,7 @@ class Enemy():
             self.image = pygame.transform.scale(pygame.image.load("images/enemy_big.png").convert_alpha(), (50, 50))
             self.speed = 2
         self.hp=hp
+        self.hp_max=hp
         self.gold=gold
         self.button = pygame.Rect(100, 100, 50, 50)
         self.rect = self.image.get_rect(center=(self.button.centerx, self.button.centery))
@@ -18,6 +19,8 @@ class Enemy():
 
     def draw_Enemy(self, s):
         s.blit(self.image, self.button.topleft)
+        hp_bar=int(50*self.hp/self.hp_max)
+        pygame.draw.rect(s,RED,[self.button.left, self.button.bottom,hp_bar,10])
 
     def move_Enemy(self, r):
         if self.index==len(r):

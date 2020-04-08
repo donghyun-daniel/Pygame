@@ -107,6 +107,14 @@ while True: #Game Screen of TD
                 if tower[i][j]:
                     if tower[i][j].type>0:
                         game_screen.screen.blit(tower[i][j].image, tower[i][j].image.get_rect(centerx=tower[i][j].button.centerx, centery=tower[i][j].button.centery))
+                        if tower[i][j].delay<tower[i][j].atk_speed: #manage tower atk speed
+                            tower[i][j].delay+=1
+                        drop_gold = Tower.tower_attack(tower[i][j], E)
+                        if drop_gold:
+                            money+=drop_gold
+                        if tower[i][j].button.collidepoint(mouse):
+                            pygame.draw.circle(game_screen.screen, (100, 200, 100), tower[i][j].button.center, tower[i][j].range, 1)
+
 
 
         print_map(map, map_pos, game_screen.screen)
@@ -127,28 +135,6 @@ while True: #Game Screen of TD
                 build_state=False
                 money=m
 
-
-
-
-        """
-        if build_state:
-            which=build_towers(build, mouse, event, game_screen.screen)
-            if which == build[0]: #if click cancel button
-                print("Cancel")
-                build_state = False
-            elif which == build[1]:
-                print("11")
-                build_state = False
-                #build tower1
-            elif which == build[2]:
-                print("22")
-                build_state = False
-                # build tower2
-            elif which == build[3]:
-                print("33")
-                build_state = False
-                # build tower3
-                """
         if cnt>=300: #stage start interval
             if stage_enemy[stage_index][0] > 0 and cnt>=500:
                 stage_enemy_small(cnt, 100+(stage_index//10)*20, 10, E, stage_enemy) # cnt, hp, small_interval, big_interval, E, s
@@ -161,7 +147,9 @@ while True: #Game Screen of TD
         #move enemy
         i=0
         while i<len(E):
-            if Enemy.move_Enemy(E[i], route):
+            if Enemy.move_Enemy(E[i], route) or E[i].hp<=0: #if enemy arrive at end point
+                if E[i].hp>0:
+                    life-=(E[i].hp//20)
                 del E[i]
                 i -= 1
             else:
