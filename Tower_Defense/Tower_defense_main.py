@@ -21,13 +21,13 @@ def print_map(m,m_p,screen): #draw available area
 
 def stage_enemy_small(cnt, hp, small_interval, E, s):
     if cnt%small_interval==0:
-        E.append(Enemy(hp, 10, "small"))  # hp, gold, kind
+        E.append(Enemy(hp, 5, "small"))  # hp, gold, kind
         s[stage_index][0]-=1
 
 
 def stage_enemy_big(cnt, hp, big_interval, E, s):
     if cnt%big_interval==0:
-        E.append(Enemy(hp, 10, "big"))  # hp, gold, kind
+        E.append(Enemy(hp, 15, "big"))  # hp, gold, kind
         s[stage_index][1]-=1
 
 #First Screen
@@ -65,19 +65,23 @@ Button.add_txt(pause, 40, "P")
 pause_font = pygame.font.SysFont('georgia', 300)
 pause_render = pause_font.render('PAUSE', True, (200, 200, 200))
 isPause=False
-money, score, life = 1000, 0, 100
+money, score, life = 500, 0, 100
 build_state, where_click= False, False # "where" is the pos where the mouse click on avail place
 build_info=0
+small_hp=100
+big_hp=450
 cnt=-1
 
 #make Enemy's list
 E=[]
 stage_enemy=[]#small_num, big_num
 for i in range(0, 50):
-    if i%3==2:
-        stage_enemy.append([i * 3, i * 3])
+    if i%10 ==1:
+        stage_enemy.append([0, i * 3])
+    elif i%3==2:
+        stage_enemy.append([i * 3, i])
     else:
-        stage_enemy.append([i * 5 + 5, 0])
+        stage_enemy.append([i * 6 + 5, 0])
 stage_index=0
 
 while True: #Game Screen of TD
@@ -110,9 +114,9 @@ while True: #Game Screen of TD
                         if tower[i][j].delay<tower[i][j].atk_speed: #manage tower atk speed
                             tower[i][j].delay+=1
                         drop_gold = Tower.tower_attack(tower[i][j], E)
-                        if drop_gold:
+                        if drop_gold: #Collect the drop gold
                             money+=drop_gold
-                        if tower[i][j].button.collidepoint(mouse):
+                        if tower[i][j].button.collidepoint(mouse): #Show tower's atk range
                             pygame.draw.circle(game_screen.screen, (100, 200, 100), tower[i][j].button.center, tower[i][j].range, 1)
 
 
@@ -137,12 +141,15 @@ while True: #Game Screen of TD
 
         if cnt>=300: #stage start interval
             if stage_enemy[stage_index][0] > 0 and cnt>=500:
-                stage_enemy_small(cnt, 100+(stage_index//10)*20, 10, E, stage_enemy) # cnt, hp, small_interval, big_interval, E, s
+                stage_enemy_small(cnt, small_hp, 10, E, stage_enemy) # cnt, hp, small_interval, big_interval, E, s
             if stage_enemy[stage_index][1] > 0:
-                stage_enemy_big(cnt, 200+(stage_index//10)*50, 40, E, stage_enemy) # cnt, hp, small_interval, big_interval, E, s
+                stage_enemy_big(cnt, big_hp , 40, E, stage_enemy) # cnt, hp, small_interval, big_interval, E, s
             if stage_enemy[stage_index]==[0,0] and len(E)==0: #Everthing made or All enemy is dead
+                small_hp = int(small_hp*1.1)
+                big_hp = int(big_hp*1.1)
                 cnt=0
                 stage_index+=1
+                score+=life
 
         #move enemy
         i=0
@@ -151,6 +158,7 @@ while True: #Game Screen of TD
                 if E[i].hp>0:
                     life-=(E[i].hp//20)
                 del E[i]
+                score+=5
                 i -= 1
             else:
                 Enemy.draw_Enemy(E[i],game_screen.screen)

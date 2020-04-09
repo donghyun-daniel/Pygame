@@ -14,7 +14,7 @@ tower_price=[[30,60,120],
              [50,100,200],
              [100,200,400]]
 tower_range=[[300, 310, 320],
-             [100, 110, 120],
+             [150, 160, 170],
              [400, 420, 440]]
 
 class Button():
@@ -288,7 +288,7 @@ class Tower():  #range, dmg, (atk_speed is lower is better)
         for e in enemy:
             dist= int(math.sqrt((self.button.centerx-e.button.centerx)*(self.button.centerx-e.button.centerx) + (self.button.centery-e.button.centery)*(self.button.centery-e.button.centery)))
             if dist<=self.range: #target is in the range
-                if self.delay%self.atk_speed==0:
+                if self.delay>=self.atk_speed:
                     e.hp-=self.dmg
                     self.delay = 0
                     if e.hp<=0: # if enemy killed
